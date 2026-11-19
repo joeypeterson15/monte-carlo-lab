@@ -1,6 +1,6 @@
 # USE a decorator to register kernel functions
 import numpy as np
-
+import param_models 
 KERNELS = {}
 
 def register_kernel(name: str):
@@ -10,7 +10,8 @@ def register_kernel(name: str):
     return wrapper
 
 @register_kernel("pi")
-def pi(version, params):
+def pi(version: int, params: PiParams) -> int:
+    # Create randomized x,y values between (0,1) using seed so the randomization is deterministic
     seed_val = params["seed"]
     n = params["n"]
     rng = np.random.default_rng(seed=seed_val)
@@ -27,7 +28,6 @@ def pi(version, params):
     return 4 * (circle/square)
 
 
-    # Create randomized x,y values between (0,1) using seed so the randomization is deterministic
 
 
 
