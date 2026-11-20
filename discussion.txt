@@ -1,0 +1,26 @@
+
+
+CLAIM GAP:
+    If a worker pops a chunk from queue:jobs and crashes before writing its lease and adding to inflight, 
+    the chunk is in neither place and is lost forever. The claim must be atomic.
+
+REASON FOR HAVING A "DONE" REDIS SET
+    1. duplicates
+    A REAPER CAN'T TELL DEAD FROM SLOW. It only sees “no lease renewal for 15 seconds.” 
+    A worker stuck in a long GC pause, a CPU-starved container, or a delayed Redis connection looks 
+    identical to a crashed one. The reaper requeues the chunk, a second worker runs it, and then the 
+    first worker wakes up and finishes too. Both results land in queue:results. 
+
+    This is the zombie case, and it's inherent to any lease-based system: you trade between 
+    false positives (requeueing live work) and slow failure detection, but you can't eliminate both.
+
+    2. Knowing when job is done
+
+    Solution: Duplicate possibilities are inherently baked into the leasing approach. 
+    So we can potentially have the same jobs done twice. We can prevent merging
+    duplicates by using a redis set, and checking whether the finished job was already added
+
+
+HEARTBEATS
+    -coordinator looks through "inflight", and checks whether lease exists.
+    -if lease does not exist, we assume worker has died and the job is requeued.

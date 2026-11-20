@@ -19,10 +19,8 @@ if not RESULT_QUEUE:
 
 client = redis.Redis.from_url(REDIS_URL)
 
-
 def _stop(_signum: int, _frame: object) -> None:
     sys.exit(0)
-
 
 def main(worker: Worker) -> None:
     signal.signal(signal.SIGTERM, _stop)
@@ -30,11 +28,22 @@ def main(worker: Worker) -> None:
     while True:
         try:
             if not worker.isBusy:
+
+                # NEED CLAIM SCRIPT to avoid workers dying between pulling jobs and adding to lease/inflight
                 job = client.brpop(WORKER_QUEUE, timeout= IDLE_SECONDS)
-                if job:
-                    name,version,payload = job
-                    result = worker.run(name, version, json.loads(payload))
-                    client.lpush(RESULT_QUEUE, json.dumps(result))
+                name, job_id, chunk_id, payload = job
+                client.set("lease", f"{job_id}:{chunk_id}", ex=5)
+                client.sadd("inflight", f"{job_id}:{chunk_id}")
+
+                result = worker.run(name, version, json.loads(payload))
+
+                with redis.pipeline() as pipe: #all commands in pipeline sent to redis as a single atomic batch
+                    pipe.lpush(RESULT_QUEUE, json.dumps(result))
+                    pipe.srem("inflight", f"{job_id}:{chunk_id}")
+                    pipe.delete("lease", f"{job_id}:{chunk_id}")
+
+                    pipe.execute()
+
         except redis.exceptions.RedisError:
             # TELL CORDINATOOR 
             time.sleep(1)

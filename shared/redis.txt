@@ -1,0 +1,4 @@
+LEASE(set) => key: "job:{job}:lease", value: "{chunk_id}"
+INFLIGHT(set) => key: "job:{job}:inflight", value: "{chunk_id}"
+DONE(set) => key: "job:{job}:done", value: "{chunk_id}"
+STATE(JSON/hash) => key: "job:{job}", value: merged_stats
