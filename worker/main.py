@@ -29,7 +29,7 @@ def main(worker: Worker) -> None:
         try:
             if not worker.isBusy:
 
-                # NEED CLAIM SCRIPT to avoid workers dying between pulling jobs and adding to lease/inflight
+                # TO DO: ATOMIC CLAIM SCRIPT to avoid workers dying between pulling jobs and adding to lease/inflight
                 job = client.brpop(WORKER_QUEUE, timeout= IDLE_SECONDS)
                 name, job_id, chunk_id, payload = job
                 client.set("lease", f"{job_id}:{chunk_id}", ex=5)
