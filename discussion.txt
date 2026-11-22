@@ -1,8 +1,14 @@
 
 
 CLAIM GAP:
-    If a worker pops a chunk from queue:jobs and crashes before writing its lease and adding to inflight, 
+    - If a worker pops a chunk from queue:jobs and crashes before writing its lease and adding to inflight, 
     the chunk is in neither place and is lost forever. The claim must be atomic.
+    - "A Python lock can't coordinate eight separate containers, because they don't share memory(containers = different process). 
+    Redis is the one place they all share, so that's where the atomicity has to live."
+
+ATOMIC CLAIM SCRIPT:
+    To avoid workers dying between pulling jobs and adding to lease/inflight
+
 
 REASON FOR HAVING A "DONE" REDIS SET
     1. duplicates
