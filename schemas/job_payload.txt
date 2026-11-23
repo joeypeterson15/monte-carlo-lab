@@ -1,0 +1,13 @@
+Browser => API
+{
+    name: string
+    n_iterations: number
+}
+
+API => REDIS submitted <= coordinator
+{
+    name: name: string
+    n_iterations: number   
+}
+
+Coordinator => REDIS jobs:queue

@@ -10,7 +10,7 @@ class Worker():
     def run(self, job: JSON):
         kernel_name, chunk, payload = json.load(job)
         try:
-            return KERNELS[name(params)]
+            return KERNELS[name(params)]["func"]
         except Exception as e:
             raise f"An error occured calling kernel function in worker node: {e}"
         # exit loop? Kill node? Or try grabbing another job? 

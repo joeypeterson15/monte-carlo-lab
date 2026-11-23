@@ -1,0 +1,21 @@
+Workers subscribe
+JOBS(queue) => key: "jobs:queue", value: "{job}"
+
+Workers push to lease
+LEASE(key/value) => key: "lease:{job.job_id}:{job.chunk_id}", value: "worker_id"
+
+Workers push to inflight
+Reaper scans inflight and checks if Lease is there, if not, then it requeues job
+INFLIGHT(set) => key: "infight:{job}:{job._id}:{job.chunk_id}", value: "worker_id"
+
+Workers pus to DONE
+Aggregator subscribes to DONE to crunch results
+We use a set here in case of duplicate results
+DONE(set) => key: "done:{job_id}", value: "{result}"
+
+API publishes to submitted
+SUBMITTED(set) => key: "submitted:{name}", value: {job}"
+
+Aggregator publishes to state
+API subscribes and uses open connection(WEBSOCKET) to publish to Browser 
+STATE(JSON/hash) => key: "state", value: merged_stats
