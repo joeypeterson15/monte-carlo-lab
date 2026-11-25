@@ -6,15 +6,17 @@ const redis = new Redis(redisUrl, { maxRetriesPerRequest: null })
 interface JobPayload {
     name: string;
     iterations: number;
-
 }
+
 class Coordinator {
     constructor(){
     }
     process(payload){
+        
         const jobPayload = JSON.parse(payload) as JobPayload
         const { name, iterations } = JobPayload
-
     }
 }
+
+
 

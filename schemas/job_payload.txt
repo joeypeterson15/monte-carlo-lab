@@ -10,4 +10,7 @@ API => REDIS submitted <= coordinator
     n_iterations: number   
 }
 
-Coordinator => REDIS jobs:queue
+Coordinator => REDIS jobs:queue <= Worker
+{
+    job:
+}

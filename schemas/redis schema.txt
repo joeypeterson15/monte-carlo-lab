@@ -1,5 +1,17 @@
 Workers subscribe
-JOBS(queue) => key: "jobs:queue", value: "{job}"
+COODINATOR PUBLISHES
+JOBS(queue) => key: "jobs:queue", value: "{LOOK BELOW}"
+
+job_id	job42	Which job this belongs to (used for lease, inflight, and result keys)
+chunk_id	7	Which slice of the job. Also the seed input and the dedupe key
+kernel	"pi"	Registry lookup name
+kernel_version	1	The worker refuses the chunk if its code version doesn't match
+params	{} for pi	Validated kernel parameters, passed through untouched
+n	250000	Samples in this chunk, not the whole job
+entropy	a big integer	The job's base seed. The worker combines it with chunk_id to build the seed
+schema_version	1	Version of the message format itself
+
+Optionally add attempt (how many times it's been requeued) and enqueued_at (for debugging queue latency).
 
 Workers push to lease
 LEASE(key/value) => key: "lease:{job.job_id}:{job.chunk_id}", value: "worker_id"
